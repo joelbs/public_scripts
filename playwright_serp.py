@@ -1,18 +1,50 @@
+'''
+Usage:
+    playwright_serp.py <q> [<pages>]
+'''
+
 from playwright.sync_api import Playwright, sync_playwright, expect
 from time import sleep
 from random import randint
 import json
 import os
+from docopt import docopt
 
-# --- put your inputs in scratchpad ---
+# -- use docopt for command line usage
+arguments = docopt(__doc__)
+print(arguments)
+
+# --- or put your searches in scratchpad ---
 from scratchpad import query_list
 
+# --- or just use this list ---
+ql = []
 
-queries = query_list
+# --- END OF BEGINNING ---
+
+queries = []
+depth = 0
+
+if arguments["<pages>"]:
+    depth = int(arguments["<pages>"])
+
+if arguments["<q>"]:
+    for q in arguments["<q>"].split(","):
+        queries.append(q)
+elif len(query_list) > 0:
+    queries = query_list
+else:
+    queries = ql
+
+print(queries)
+
 output_dir = "scratch"
 
 def act_natural():
     sleep(randint(1,5))
+
+def pretend_to_read():
+    sleep(randint(5,17))
 
 def run(playwright: Playwright) -> None:
     browser = playwright.chromium.launch(headless=False)
@@ -36,7 +68,7 @@ def run(playwright: Playwright) -> None:
             page.goto(url)
 
             try:
-                for i in range(5):
+                for i in range(depth):
                     page.get_by_role("link", name="More results").click()
                     act_natural()
             except Exception as ex:
@@ -67,9 +99,9 @@ def run(playwright: Playwright) -> None:
             browser.close()
             print(ex)
         
-        sleep(randint(10,30))
+        pretend_to_read()
 
-    with open('search_results.json', 'w') as f:
+    with open(os.path.join(output_dir, 'search_results.json'), 'w') as f:
         json.dump(all_links, f)
 
     # ---------------------
@@ -79,3 +111,4 @@ def run(playwright: Playwright) -> None:
 
 with sync_playwright() as playwright:
     run(playwright)
+

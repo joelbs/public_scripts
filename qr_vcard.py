@@ -24,7 +24,7 @@ def createStaffQRCodes(csv_in, csv_out, save_to):
         data = f'''BEGIN:VCARD\nVERSION:3.0\nN:{lastname};{firstname}\nFN:{firstname} {lastname}\nORG:{org}\nTITLE:{title}\nTEL;WORK;VOICE:{phone}\nTEL;CELL:{cell}\nEMAIL;WORK;INTERNET:{email}\nURL:{website}\nEND:VCARD'''
 
         image = pyqrcode.create(data)
-        # image.svg(f"vcard_qrs/{lastname}_{firstname}.svg", scale="5")
+        image.svg(os.path.join(save_to, f"{str(values['Email']).split('@')[0]}.svg"), scale=10)
         image.png(os.path.join(save_to, f"{str(values['Email']).split('@')[0]}.png"), scale=10)
     
     df.to_csv(csv_out, index=False)
